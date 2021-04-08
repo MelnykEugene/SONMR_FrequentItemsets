@@ -164,7 +164,15 @@ public class SONMR_hash_first_round {
                 for(ItemSet set : ((LeafNode) current_node).itemsets){
                     last_items.add(set.itemset[set.itemset.length-1]);
                 }
-                return last_items.contains(item_set[item_set.length-1]);
+                return list_contains(last_items,item_set[item_set.length-1]);
+            }
+
+            private boolean list_contains(List<Integer> list, int last){
+                for(int item : list){
+                    //System.err.println("comparing "+Arrays.toString(item) + " with "+ Arrays.toString(candidate));
+                    if(last == item) return true;
+                }
+                return false;
             }
 
             //entry-point for recursive calculation of supports

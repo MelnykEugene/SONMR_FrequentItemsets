@@ -78,7 +78,7 @@ public class SONMR {
         public void map(Object key, Text value, Context context
         ) throws IOException, InterruptedException {
             Configuration conf = context.getConfiguration();
-            float corr = conf.getFloat("corr",1);
+                float corr = conf.getFloat("corr",1);
             Integer min_supp= (int) Math.round(Float.parseFloat(conf.get("minsup"))*corr/10);
 
             String[] transaction_strings = value.toString().split("\n");
@@ -171,11 +171,11 @@ public class SONMR {
                             int[] candidate = new int[k+1];
                             System.arraycopy(itemset1,0,candidate,0,k);
                             candidate[k]=itemset2[k-1];
-
                             //make sure all k subsets of our k+1 candidate are frequent
-                            if (check_frequency_of_subsets(candidate,frequentsK)) candidates.add(candidate);
+                            if (check_frequency_of_subsets(candidate,frequentsK)) {
+                                candidates.add(candidate);
+                            }
                         }
-
                     }
                 }
             }
@@ -183,18 +183,25 @@ public class SONMR {
         }
 
         private boolean check_frequency_of_subsets(int[] candidate, List<int[]> frequentsK_1){
-            //converting solely for list.contains(). lazy
-            ArrayList<int[]> frequentsk_1 = new ArrayList<int[]>();
-            for(int[] itemset : frequentsK_1)
-                frequentsk_1.add(itemset);
             //remove ith item to obtain an immediate subset
-            for(int i=0; i<candidate.length;i++){
+            for(int i=0; i<candidate.length; i++){
                 int[] first_part = Arrays.copyOfRange(candidate,0,i);
                 int[] second_part = Arrays.copyOfRange(candidate,i+1,candidate.length);
                 int[] subset = org.apache.commons.lang3.ArrayUtils.addAll(first_part,second_part);
-                if(!frequentsk_1.contains(subset)) return false;
+                if(!list_contains(frequentsK_1,subset)) {
+                    return false;
+                }
             }
             return true;
+        }
+
+        //Java comparison == is weird
+        private boolean list_contains(List<int[]> list, int[] candidate){
+            for(int[] item : list){
+                //System.err.println("comparing "+Arrays.toString(item) + " with "+ Arrays.toString(candidate));
+                if(Arrays.equals(item,candidate)) return true;
+            }
+            return false;
         }
 
         private boolean check_candidate_support(int[] item_set,List<HashSet<Integer>> transactions,int minsup){
@@ -235,8 +242,8 @@ public class SONMR {
                 for(int i=0;i<items_str.length;i++) itemset[i] = Integer.parseInt(items_str[i]);
                 candidates.add(itemset);
             }
-
         }
+
         public void map(Object key, Text value, Context context) throws IOException,InterruptedException{
             //convert value to int array
             String[] items_str = value.toString().split(" ");
